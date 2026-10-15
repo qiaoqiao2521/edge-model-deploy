@@ -46,6 +46,12 @@ AGP 的 externalNativeBuild 负责打包；最终仍需从 APK 回读实际依�
 - 取消不能排在推理任务使用的同一执行锁后面；否则会等待推理完成。
 - 等待推理任务退出后才能释放 engine；不要从 UI 线程直接删除运行中的裸指针。
 - App 在启动任务前检查 generation / cancellation，避免已取消的排队任务重新开始。
+- JNI 使用 `FullTranscribeCancellable(samples, language, prompt, threads, cancellation)`，
+  最后一个参数是 job 持有的 `const std::atomic<bool>&`。engine 不会重置它，调用返回前不能释放。
+- App 与原生库需共同重编译；旧四参调用保持源码兼容，不承诺混用旧二进制的 ABI 兼容性。
+- 模型加载本身不支持安全中断。加载时取消先标记 job，加载返回后丢弃该任务；
+  可取消推理入口也会检查同一标记，覆盖加载与推理之间的竞态。
+- App 发布最终候选前仍需在同一 job 状态锁内检查取消与终态，不能只凭 native 返回 true 发布结果。
 - 结果属于候选文字，用户确认后再插入，原有正文与配对不受影响。
 
 当前片段时间戳不是精确字对齐，已知模型可能输出超出音频尾部的边界。

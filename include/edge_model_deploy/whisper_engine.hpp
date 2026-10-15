@@ -1,5 +1,6 @@
 #pragma once
 
+#include <atomic>
 #include <cstdint>
 #include <memory>
 #include <string>
@@ -35,6 +36,16 @@ public:
     virtual int64_t GetSegmentEnd(int index) const = 0;
     virtual void Cancel() = 0;
     virtual std::string GetBackendInfo() const { return "unknown"; }
+
+    // A job-owned flag is never reset by the engine and must outlive this
+    // synchronous call. Unsupported external implementations fail closed.
+    virtual bool FullTranscribeCancellable(
+        const std::vector<float>&,
+        const std::string&,
+        const std::string&,
+        int,
+        const std::atomic<bool>&
+    ) { return false; }
 };
 
 } // namespace edge_ai

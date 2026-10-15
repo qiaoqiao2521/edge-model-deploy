@@ -16,6 +16,16 @@ struct WhisperContextDeleter {
     void operator()(whisper_context* context) const { whisper_free(context); }
 };
 
+struct AbortContext {
+    const std::atomic<bool>& internal;
+    const std::atomic<bool>* external;
+
+    bool IsCancelled() const {
+        return internal.load(std::memory_order_relaxed) ||
+               (external && external->load(std::memory_order_relaxed));
+    }
+};
+
 class StandardWhisperEngine final : public WhisperEngine {
 public:
     explicit StandardWhisperEngine(const std::string& model_path) {
@@ -34,13 +44,28 @@ public:
 
     bool FullTranscribe(const std::vector<float>& samples, const std::string& language,
                         const std::string& prompt, int num_threads) override {
+        return Transcribe(samples, language, prompt, num_threads, nullptr);
+    }
+
+    bool FullTranscribeCancellable(const std::vector<float>& samples, const std::string& language,
+                                  const std::string& prompt, int num_threads,
+                                  const std::atomic<bool>& cancellation) override {
+        return Transcribe(samples, language, prompt, num_threads, &cancellation);
+    }
+
+private:
+    bool Transcribe(const std::vector<float>& samples, const std::string& language,
+                    const std::string& prompt, int num_threads,
+                    const std::atomic<bool>* external_cancellation) {
         std::lock_guard<std::mutex> execution_lock(execution_mutex_);
         cancelled_.store(false, std::memory_order_relaxed);
+        // Local context lives until whisper_full and all its workers return.
+        AbortContext abort{cancelled_, external_cancellation};
         {
             std::lock_guard<std::mutex> lock(results_mutex_);
             segments_.clear();
         }
-        if (samples.empty() || samples.size() > static_cast<size_t>(std::numeric_limits<int>::max()) ||
+        if (abort.IsCancelled() || samples.empty() || samples.size() > static_cast<size_t>(std::numeric_limits<int>::max()) ||
             num_threads <= 0 || num_threads > GGML_MAX_N_THREADS || language.empty() ||
             language.find('\0') != std::string::npos || prompt.find('\0') != std::string::npos ||
             !std::all_of(samples.begin(), samples.end(), [](float value) { return std::isfinite(value); })) {
@@ -69,9 +94,9 @@ public:
         parameters.temperature_inc = 0.0f;
         parameters.greedy.best_of = 1;
         parameters.abort_callback = &StandardWhisperEngine::ShouldAbort;
-        parameters.abort_callback_user_data = this;
+        parameters.abort_callback_user_data = &abort;
         if (whisper_full(context_.get(), parameters, samples.data(), static_cast<int>(samples.size())) != 0 ||
-            cancelled_.load(std::memory_order_relaxed)) {
+            abort.IsCancelled()) {
             return false;
         }
 
@@ -85,13 +110,14 @@ public:
                 whisper_full_get_segment_t1(context_.get(), index) * 10});
         }
         std::lock_guard<std::mutex> lock(results_mutex_);
-        if (cancelled_.load(std::memory_order_relaxed)) {
+        if (abort.IsCancelled()) {
             return false;
         }
         segments_ = std::move(current_segments);
         return true;
     }
 
+public:
     int GetSegmentCount() const override {
         std::lock_guard<std::mutex> lock(results_mutex_);
         return static_cast<int>(segments_.size());
@@ -115,7 +141,7 @@ public:
 
 private:
     static bool ShouldAbort(void* user_data) {
-        return static_cast<StandardWhisperEngine*>(user_data)->cancelled_.load(std::memory_order_relaxed);
+        return static_cast<AbortContext*>(user_data)->IsCancelled();
     }
     bool ValidIndex(int index) const {
         return index >= 0 && static_cast<size_t>(index) < segments_.size();

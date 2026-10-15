@@ -57,6 +57,11 @@ int main(int argc, char** argv) {
                   engine->GetSegmentBegin(0) == 0 && engine->GetSegmentEnd(0) == 0,
                   "Invalid calls exposed stale or invalid segments");
             Check(engine->GetBackendInfo().find("whisper.cpp") != std::string::npos, "Backend identification missing");
+            const std::atomic<bool> cancelled_job{true};
+            Check(!engine->FullTranscribeCancellable(silence, "en", "", 1, cancelled_job),
+                  "A job cancelled before inference was restarted");
+            Check(cancelled_job.load() && engine->GetSegmentCount() == 0,
+                  "External cancellation was reset or exposed results");
         }
         std::filesystem::remove_all(path);
         std::cout << "Native boundary tests passed" << (argc == 2 ? " with real model" : " without model") << '\n';
