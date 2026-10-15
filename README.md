@@ -49,6 +49,9 @@ ffmpeg -i recording.m4a -ac 1 -ar 16000 -c:a pcm_s16le recording.wav
 | `EdgeAudioPipeline` | 旧文本清洗及等分时长估算，不能用作 ASR 或声学字对齐 |
 | JNI | 接口原型，未完成 Android 构建与设备验收 |
 
+Android CMake 共享库已支持按 ABI 构建，App 接入合同见
+[Android 接入说明](docs/ANDROID_INTEGRATION.md)。LifeGame 联调状态单独记录，不复用桌面验收结论。
+
 本轮使用固定的 [whisper.cpp v1.8.2](https://github.com/ggml-org/whisper.cpp/tree/v1.8.2)，
 修订 `4979e04f5dcaccb36057e059bbaed8a2f5288315`，CPU 后端通过上游 CMake 构建。
 固定版本用于复现，不表示最新版本。模型来源、大小和哈希见

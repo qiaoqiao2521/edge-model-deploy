@@ -25,7 +25,9 @@
 当前本机基线支持速度、词错误率与内存的配置取舍；尚无论文贡献结论。
 
 ## Current Priority
-以现有 ARM 设备扩大真实基线，先找到固定配置的可重复问题，再决定调度策略。
+用户于 2026-10-16 要求与 LifeGame app 协作，直接部署到 Android App。
+先交付可嵌入的 Android 原生库，再由 LifeGame 接入真实录音、权重管理与结果核对。
+完成后以实际 App 运行证据更新 Android 验收边界；研究贡献仍需独立验证。
 
 ## Knowledge Map
 - [README](README.md)：构建、运行与能力边界。
@@ -33,3 +35,4 @@
 - [当前计划](plans/real-whisper-baseline-20261015/task_plan.md)：验收和分工。
 - [发现](plans/real-whisper-baseline-20261015/findings.md)：来源与实验限制。
 - [进度](plans/real-whisper-baseline-20261015/progress.md)：恢复入口。
+- [LifeGame 接入](plans/lifegame-android-20261016/task_plan.md)：双仓分工和移动验收。

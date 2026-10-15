@@ -5,6 +5,16 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
+# Android apps need the library, without desktop tools or host test programs.
+set(EDGE_DESKTOP_DEFAULT ON)
+if(ANDROID)
+    set(EDGE_DESKTOP_DEFAULT OFF)
+    option(GGML_NATIVE "Build for the device ABI rather than the build host" OFF)
+    option(GGML_OPENMP "Use OpenMP; an Android app must also package its runtime" OFF)
+endif()
+option(EDGE_BUILD_TOOLS "Build the standalone transcription CLI" ${EDGE_DESKTOP_DEFAULT})
+option(EDGE_BUILD_TESTS "Build native engine boundary tests" ${EDGE_DESKTOP_DEFAULT})
+
 if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/third_party/whisper.cpp/include/whisper.h")
     message(FATAL_ERROR "Missing whisper.cpp submodule. Run: git submodule update --init --recursive")
 endif()
@@ -37,16 +47,20 @@ target_include_directories(edge_model_deploy PUBLIC
 )
 target_link_libraries(edge_model_deploy PRIVATE whisper)
 
-add_executable(edge-transcribe tools/edge_transcribe.cpp)
-target_link_libraries(edge-transcribe PRIVATE edge_model_deploy)
-if(APPLE)
-    set_target_properties(edge-transcribe PROPERTIES INSTALL_RPATH "@loader_path/../lib")
-elseif(UNIX)
-    set_target_properties(edge-transcribe PROPERTIES INSTALL_RPATH "$ORIGIN/../lib")
+if(EDGE_BUILD_TOOLS)
+    add_executable(edge-transcribe tools/edge_transcribe.cpp)
+    target_link_libraries(edge-transcribe PRIVATE edge_model_deploy)
+    if(APPLE)
+        set_target_properties(edge-transcribe PROPERTIES INSTALL_RPATH "@loader_path/../lib")
+    elseif(UNIX)
+        set_target_properties(edge-transcribe PROPERTIES INSTALL_RPATH "$ORIGIN/../lib")
+    endif()
 endif()
 
-include(CTest)
-if(BUILD_TESTING)
+if(EDGE_BUILD_TESTS)
+    include(CTest)
+endif()
+if(EDGE_BUILD_TESTS AND BUILD_TESTING)
     add_executable(native-engine-tests tests/native_engine_test.cpp)
     target_link_libraries(native-engine-tests PRIVATE edge_model_deploy)
     add_test(NAME native-engine-boundaries COMMAND native-engine-tests)
@@ -57,9 +71,12 @@ if(BUILD_TESTING)
 endif()
 
 # 安装目标配置
-install(TARGETS edge_model_deploy edge-transcribe
+install(TARGETS edge_model_deploy
     LIBRARY DESTINATION lib
     ARCHIVE DESTINATION lib
     RUNTIME DESTINATION bin
 )
+if(EDGE_BUILD_TOOLS)
+    install(TARGETS edge-transcribe RUNTIME DESTINATION bin)
+endif()
 install(DIRECTORY include/ DESTINATION include)
