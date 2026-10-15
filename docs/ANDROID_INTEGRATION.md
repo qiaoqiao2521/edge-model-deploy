@@ -59,6 +59,10 @@ App 不得把此接口称为已验证的字级字幕对齐。
 
 ## 当前接入状态
 
-ARM64/x86_64 交叉编译已通过。LifeGame 实际 App 联调及交付状态见
-[当前计划](../plans/lifegame-android-20261016/progress.md)。
+ARM64/x86_64 交叉编译已通过。LifeGame 生产 JNI 的公开英文、普通话和运行中取消，
+以及实际 AudioRecord、页面取消和切后台的原文保护，已在隔离 x86_64 Android 运行通过。
+ARM64 APK 的包身份、旧签名和全部共享库 16 KB 对齐检查通过。
+首次 Tiny HTTPS 下载在当前模拟器网络下超时，未取得完整下载通过证据。
+详细证据见 [LifeGame 验证记录](LIFEGAME_ANDROID_20261016.md)，
+最终交付状态见 [当前计划](../plans/lifegame-android-20261016/progress.md)。
 不要把交叉编译成功写成实体手机已验收。

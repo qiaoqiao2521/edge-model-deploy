@@ -47,10 +47,13 @@ ffmpeg -i recording.m4a -ac 1 -ar 16000 -c:a pcm_s16le recording.wav
 | 硬件检测器 | 读取 CPU 特征并给出历史建议名称；没有实现按建议动态装载库 |
 | C++ `DynamicModelDelivery` | 保留旧符号，但停止写假模型；下载与校验使用 Python 管理器 |
 | `EdgeAudioPipeline` | 旧文本清洗及等分时长估算，不能用作 ASR 或声学字对齐 |
-| JNI | 接口原型，未完成 Android 构建与设备验收 |
+| JNI | 仓内历史原型保留；LifeGame 使用自己的真实 JNI 适配层 |
 
-Android CMake 共享库已支持按 ABI 构建，App 接入合同见
-[Android 接入说明](docs/ANDROID_INTEGRATION.md)。LifeGame 联调状态单独记录，不复用桌面验收结论。
+Android CMake 共享库已支持按 ABI 构建，LifeGame 已接回真实录音与离线识别。
+隔离 Android x86_64 的英文、普通话 JNI 和录音取消检查通过，ARM64 测试 APK 已构建。
+首次模型下载在本轮模拟器网络下超时，实体手机尚未验收。
+详见 [Android 接入说明](docs/ANDROID_INTEGRATION.md) 和
+[LifeGame 验证记录](docs/LIFEGAME_ANDROID_20261016.md)。
 
 本轮使用固定的 [whisper.cpp v1.8.2](https://github.com/ggml-org/whisper.cpp/tree/v1.8.2)，
 修订 `4979e04f5dcaccb36057e059bbaed8a2f5288315`，CPU 后端通过上游 CMake 构建。
@@ -58,7 +61,8 @@ Android CMake 共享库已支持按 ABI 构建，App 接入合同见
 [`delivery.py`](python/edge_model_deploy/delivery.py)。旧的随机字节缓存会被拒绝。
 上游 MIT 许可证保留在子模块中；本仓库代码使用 [Apache-2.0](LICENSE)。
 
-未验收：ARM/Android、热降频、功耗、量化切档、自适应调度、动态库切换，以及相对通用库的提速。
+未验收：ARM64 实体设备运行、16 KB 实体设备、完整模型下载网络链路、
+热降频、功耗、量化切档、自适应调度、动态库切换，以及相对通用库的提速。
 
 ## 可复现实验
 

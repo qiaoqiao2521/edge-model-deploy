@@ -7,7 +7,7 @@
 沿用现有仓库；以已有设备和有限预算建立可信实验，之后评估论文贡献。
 
 ## Non-goals
-本阶段不宣称论文创新、性能倍数、真实字级对齐或移动设备已验收。
+本阶段不宣称论文创新、性能倍数、真实字级对齐或实体手机已验收。
 不执行远程板卡压力测试，不购买设备，不改动已投稿的视觉论文。
 
 ## Success
@@ -23,11 +23,13 @@
 ## Current State
 真实 C++ / Python 推理已通过 JFK 音频联调，固定 LibriSpeech 小样本 144 次测量全部完成。
 当前本机基线支持速度、词错误率与内存的配置取舍；尚无论文贡献结论。
+LifeGame 已部署真实 JNI、录音与候选核对流程。隔离 Android x86_64 公开音频和生命周期检查通过；
+ARM64 安装包的身份、签名和对齐检查通过。首次模型下载在当前模拟器网络下超时，手机运行待验。
 
 ## Current Priority
 用户于 2026-10-16 要求与 LifeGame app 协作，直接部署到 Android App。
-先交付可嵌入的 Android 原生库，再由 LifeGame 接入真实录音、权重管理与结果核对。
-完成后以实际 App 运行证据更新 Android 验收边界；研究贡献仍需独立验证。
+原生接口与 App 接入已完成，固定版本、覆盖升级和安装包交付已核对。
+实际 App 证据单独记录；研究贡献仍需独立验证。
 
 ## Knowledge Map
 - [README](README.md)：构建、运行与能力边界。
@@ -36,3 +38,4 @@
 - [发现](plans/real-whisper-baseline-20261015/findings.md)：来源与实验限制。
 - [进度](plans/real-whisper-baseline-20261015/progress.md)：恢复入口。
 - [LifeGame 接入](plans/lifegame-android-20261016/task_plan.md)：双仓分工和移动验收。
+- [LifeGame 验证](docs/LIFEGAME_ANDROID_20261016.md)：实际 Android 证据与边界。
