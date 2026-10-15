@@ -1,0 +1,30 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C++ Build artifacts
+build/
+bin/
+lib/
+*.so
+*.dylib
+*.dll
+*.a
+
+# Model weights & cache
+models/*.bin
+models/*.gguf
+*.tflite
+*.onnx
+
+# Python packaging
+dist/
+*.egg-info/
+.pytest_cache/
+.coverage
+
+# IDE
+.vscode/
+.idea/
+*.swp
