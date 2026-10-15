@@ -6,8 +6,8 @@
 namespace edge_ai {
 
 enum class ModelTier {
-    TINY,   // 快速低功耗，约 75MB
-    BASE    // 高精度大词表，约 145MB
+    TINY,   // Multilingual Tiny; performance depends on measured conditions.
+    BASE    // Multilingual Base; shares the multilingual vocabulary.
 };
 
 struct ModelMetadata {
@@ -25,7 +25,7 @@ public:
     bool IsModelAvailable(ModelTier tier) const;
     std::string GetModelPath(ModelTier tier) const;
 
-    // 动态按需加载或验证本地权重
+    // Deprecated: fails closed. Use Python DynamicModelManager for verified delivery.
     bool EnsureModel(ModelTier tier, std::function<void(float progress)> on_progress = nullptr);
 
 private:

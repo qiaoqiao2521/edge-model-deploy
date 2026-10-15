@@ -1,12 +1,11 @@
-"""
-EdgeModelDeploy: 对标一线移动音视频商业软件的高性能端侧 AI 部署与动态交付引擎
-"""
+"""Real Whisper inference, verified model delivery, and measurement helpers."""
 
 from .detector import HardwareDetector, HardwareProfile
 from .delivery import DynamicModelManager, ModelTier
 from .engine import EdgeAudioPipeline, WordTimingSegment
+from .native import WhisperTranscriber
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 __all__ = [
     "HardwareDetector",
     "HardwareProfile",
@@ -14,4 +13,5 @@ __all__ = [
     "ModelTier",
     "EdgeAudioPipeline",
     "WordTimingSegment",
+    "WhisperTranscriber",
 ]

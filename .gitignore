@@ -5,6 +5,7 @@ __pycache__/
 
 # C++ Build artifacts
 build/
+build-*/
 bin/
 lib/
 *.so
@@ -15,6 +16,12 @@ lib/
 # Model weights & cache
 models/*.bin
 models/*.gguf
+models/*.part
+models/.*.part
+models/*.tmp
+data/
+runs/
+.venv/
 *.tflite
 *.onnx
 

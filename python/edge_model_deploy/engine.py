@@ -5,18 +5,19 @@ from typing import List, Tuple
 
 @dataclass
 class WordTimingSegment:
+    """Legacy equal-duration text layout; these are not acoustic word alignments."""
     word: str
     start_ms: int
     end_ms: int
 
 
 class EdgeAudioPipeline:
-    """端侧音频处理管线：转写、字级时间戳切分与语气词过滤"""
+    """Legacy text cleanup and approximate layout; no audio inference or alignment."""
 
     FILLER_REGEX = re.compile(r"^(呃|啊|嗯|那个|这个|然后|就是说)+|(呃|啊|嗯|那个|这个|然后|就是说)+$|\b(um|uh|er|ah)\b", re.IGNORECASE)
 
     def filter_disfluencies(self, text: str) -> Tuple[str, List[str]]:
-        """过滤口播常见冗余语气词 (对标商业剪辑 App 的 Disfluency Filter)"""
+        """Heuristic text cleanup; may remove meaningful words. Not used for WER."""
         dropped = []
         cleaned = text.strip()
         matches = self.FILLER_REGEX.findall(cleaned)
@@ -28,6 +29,7 @@ class EdgeAudioPipeline:
         return cleaned, dropped
 
     def process_transcript(self, raw_text: str, total_duration_sec: float = 3.0) -> Tuple[str, List[WordTimingSegment], List[str]]:
+        """Estimate equal-duration text layout, not speech-derived word timestamps."""
         cleaned_text, dropped_fillers = self.filter_disfluencies(raw_text)
         words = [w for w in re.split(r"(\s+|[，。！？,.!?])", cleaned_text) if w and not w.isspace()]
         if not words:

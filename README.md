@@ -1,126 +1,89 @@
-# EdgeModelDeploy (端侧大模型轻量化推理与动态交付引擎)
+# EdgeModelDeploy
 
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
-[![Platform](https://img.shields.io/badge/Platform-Android%20%7C%20Linux%20%7C%20Embedded-brightgreen.svg)]()
-[![Inference](https://img.shields.io/badge/Inference-Whisper.cpp%20%2B%20GGML%20FP16-orange.svg)]()
+真实 Whisper CPU 推理、经 SHA-256 验证的按需权重交付，以及可复现的语音基准工具。
+保留初版 C++ / Python 接口，正在从工程骨架推进到可验证实现。
+当前结果不构成论文创新或性能倍数的证据。
 
-`EdgeModelDeploy` 是一套**对标一线移动音视频商业软件（如 VN Video Editor、Captions）**的高性能端侧 AI 部署与动态交付框架。
+## 构建与运行
 
-专为移动端（Android / iOS）及边端嵌入式 Linux（树莓派、RK3588、Jetson、x86 工控机）设计，解决了移动端部署大模型时的三大核心痛点：
-1. **安装包体积膨胀**：主包 0 模型体积，采用动态按需加载（Feature Delivery）架构；
-2. **移动端 CPU 算力受限**：运行时 CPU ISA 动态感知，自动调度 ARMv8.2-A FP16 / NEON 汇编特化动态库；
-3. **口语识别冗余**：内建端侧语气词与静音停顿过滤（Disfluency & Pause Suppressor）。
+需要 Git、CMake ≥ 3.16、C++17 编译器和 Python ≥ 3.8。
+数据集准备另需 `ffmpeg`。首次下载权重需要网络，之后推理可离线运行。
 
----
-
-## 核心架构与功能特性
-
-```
-                    +------------------------------------------+
-                    |           应用业务层 (Java/Kotlin/Python)  |
-                    +--------------------+---------------------+
-                                         |
-                       +-----------------+-----------------+
-                       |                                   |
-                       v                                   v
-        +-----------------------------+     +-----------------------------+
-        |   Dynamic Feature Delivery  |     |   Hardware ISA Detector     |
-        |  (按需权重下载 / SHA256 校验) |     |  (/proc/cpuinfo 特性动态嗅探) |
-        +--------------+--------------+     +--------------+--------------+
-                       |                                   |
-                       +-----------------+-----------------+
-                                         |
-                                         v
-                    +------------------------------------------+
-                    |    自适应 Native 核心选择器 (SO Loader)    |
-                    |   [libwhisper_v8fp16_va / vfpv4 / arm64] |
-                    +--------------------+---------------------+
-                                         |
-                                         v
-                    +------------------------------------------+
-                    |   端侧 Whisper.cpp + GGML C++ 计算图核心  |
-                    |  - 16kHz PCM 单声道浮点归一化流            |
-                    |  - OpenMP 多核并行张量加速                |
-                    |  - 毫秒级字/词边界时间戳直出 (WordTimings) |
-                    |  - 口语语气词 ("呃/啊/那个") 智能清洗      |
-                    +------------------------------------------+
-```
-
-### 1. 硬件感知与指令集自适应装载 (Hardware-Adaptive Vector Acceleration)
-在运行时自动读取硬件寄存器与 `/proc/cpuinfo`，动态决策装载最优动态库：
-- **ARMv8.2-A+ (`fphp`)**：加载半精度浮点向量加速库 `libwhisper_v8fp16_va.so`（速度较通用版提升 2~3 倍）；
-- **ARMv7-A (`vfpv4`)**：加载带 VFPv4 FMA 指令集的 `libwhisper_vfpv4.so`；
-- **通用架构**：回退至标准基线动态库 `libwhisper.so`。
-
-### 2. 轻量动态分发 (On-Demand Feature Delivery)
-- 初始安装包仅包含精简 Native 引导层，体积仅数百 KB；
-- 首次使用本地转写时，根据用户选取的模型等级（Tiny 档快速响应 vs Base 档高精度词表），按需异步拉取权重并验证 SHA256 签名，完全避免包体积暴增。
-
-### 3. 字级时间轴与语气词过滤 (Kinetic WordTimings & Disfluency Filter)
-- 直接输出包含起止毫秒时间戳的字词序列；
-- 自动剔除口播中的多余停顿与停用语气助词（"呃"、"啊"、"那个"、"um"、"uh"），为后续动效卡拉OK字幕（Kinetic Captions）直接提供纯净数据源。
-
----
-
-## 快速上手 (Python)
-
-### 安装
 ```bash
-cd python
-pip install -e .
+git clone --recurse-submodules https://github.com/qiaoqiao2521/edge-model-deploy.git
+cd edge-model-deploy
+git submodule update --init --recursive
+cmake -S . -B build-native -DCMAKE_BUILD_TYPE=Release -DGGML_NATIVE=OFF
+cmake --build build-native --parallel 2
+PYTHONPATH=python python3 examples/demo_edge_inference.py \
+  --executable build-native/edge-transcribe \
+  --audio third_party/whisper.cpp/samples/jfk.wav --language en --model tiny --threads 4
 ```
 
-### 运行自检
+示例下载并校验真实多语言 Tiny 权重，然后识别上游提供的真实音频。
+stdout 输出 JSON；诊断写入 stderr。错误会非零退出，不回退成占位文本。
+也可用 `python3 -m pip install -e .` 安装 Python 包；C++ 可执行程序仍需单独构建。
+
+已有经验证的权重可以直接用于原生程序：
+
 ```bash
-python examples/demo_edge_inference.py
+build-native/edge-transcribe --model models/whisper-tiny.bin \
+  --audio recording.wav --language zh --threads 4
 ```
 
-### 代码示例
-```python
-from edge_model_deploy import HardwareDetector, DynamicModelManager, EdgeAudioPipeline
+输入必须为 16 kHz、单声道、16-bit PCM WAV。需要转换时：
 
-# 1. 检测硬件矢量加速特性
-detector = HardwareDetector()
-profile = detector.get_profile()
-print(f"推荐的原生推理动态库: {profile.recommended_library}")
-
-# 2. 模型管理器校验本地权重
-manager = DynamicModelManager(cache_dir="./models")
-model_path = manager.ensure_model("whisper-tiny")
-
-# 3. 运行音频流转写与语气词过滤
-pipeline = EdgeAudioPipeline()
-cleaned_text, segments, dropped_fillers = pipeline.process_transcript("呃那个……今天给大家演示端侧模型部署")
-print(f"纯净转写: {cleaned_text}")
-print(f"过滤语气词: {dropped_fillers}")
+```bash
+ffmpeg -i recording.m4a -ac 1 -ar 16000 -c:a pcm_s16le recording.wav
 ```
 
----
+## 当前能力与边界
 
-## C++ / JNI 规范接口
+| 模块 | 当前行为 |
+| --- | --- |
+| C++ `WhisperEngine` | 调用真实 `whisper_full`，使用模型输出的片段级时间戳 |
+| Python `WhisperTranscriber` | 调用 C++ CLI，保留真实转写与测量；不自动清洗评测文本 |
+| Python `DynamicModelManager` | 固定 Tiny/Base 来源、大小与 SHA-256，校验后原子安装 |
+| 硬件检测器 | 读取 CPU 特征并给出历史建议名称；没有实现按建议动态装载库 |
+| C++ `DynamicModelDelivery` | 保留旧符号，但停止写假模型；下载与校验使用 Python 管理器 |
+| `EdgeAudioPipeline` | 旧文本清洗及等分时长估算，不能用作 ASR 或声学字对齐 |
+| JNI | 接口原型，未完成 Android 构建与设备验收 |
 
-项目在 `include/edge_model_deploy/` 与 `jni/` 提供了工业级 JNI 原生绑定头：
+本轮使用固定的 [whisper.cpp v1.8.2](https://github.com/ggml-org/whisper.cpp/tree/v1.8.2)，
+修订 `4979e04f5dcaccb36057e059bbaed8a2f5288315`，CPU 后端通过上游 CMake 构建。
+固定版本用于复现，不表示最新版本。模型来源、大小和哈希见
+[`delivery.py`](python/edge_model_deploy/delivery.py)。旧的随机字节缓存会被拒绝。
+上游 MIT 许可证保留在子模块中；本仓库代码使用 [Apache-2.0](LICENSE)。
 
-```cpp
-#include "edge_model_deploy/whisper_engine.hpp"
+未验收：ARM/Android、热降频、功耗、量化切档、自适应调度、动态库切换，以及相对通用库的提速。
 
-// 初始化上下文
-auto engine = edge_ai::WhisperEngine::Create("./models/whisper-tiny.bin");
+## 可复现实验
 
-// 送入 16kHz float32 PCM 数据执行转写
-std::vector<float> pcm_data = ...;
-engine->FullTranscribe(pcm_data, "zh", "专业术语提示词", /*num_threads=*/4);
+从官方 [OpenSLR LibriSpeech](https://www.openslr.org/12/) 获取 `test-clean.tar.gz`。
+准备脚本验证官方 MD5，只转换数字顺序前四名说话人各前三段语音，生成 12 段的固定小样本。
+这用于验证实验管线，不能代表整个测试集的准确率。
 
-// 获取分词与时间戳
-int count = engine->GetSegmentCount();
-for (int i = 0; i < count; ++i) {
-    std::string text = engine->GetSegmentText(i);
-    int64_t t0 = engine->GetSegmentBegin(i);
-    int64_t t1 = engine->GetSegmentEnd(i);
-}
+```bash
+python3 scripts/prepare_librispeech.py \
+  --archive data/downloads/test-clean.tar.gz --output data/librispeech-smoke
+python3 scripts/benchmark.py --executable build-native/edge-transcribe \
+  --manifest data/librispeech-smoke/manifest.json \
+  --model tiny=models/whisper-tiny.bin --model base=models/whisper-base.bin \
+  --threads 1 2 4 --repetitions 2 --output runs/local-baseline.json
 ```
 
----
+每次识别独立启动进程，配置交错执行；不清操作系统缓存，因此不称为冷缓存测试。
+报告模型加载、推理和进程端到端耗时，以及进程生命周期峰值 RSS。
+峰值 RSS 包括权重与运行时，不是模型文件大小，也不是整机内存。
+WER 使用统一的英文文本归一化和总词错误数 / 总参考词数；不使用语气词过滤。
+数据、权重和运行记录不提交 Git。代码、输入、模型和程序哈希保存在本地结果中。
 
-## 许可证
-本项目采用 [Apache License 2.0](LICENSE)。
+## 验证与接续
+
+```bash
+EDGE_NATIVE_EXECUTABLE=build-native/edge-transcribe PYTHONPATH=python python3 -m unittest discover -s tests -v
+ctest --test-dir build-native --output-on-failure
+```
+
+项目目标见 [PROJECT.md](PROJECT.md)，当前计划和验收状态见
+[任务进度](plans/real-whisper-baseline-20261015/progress.md)。

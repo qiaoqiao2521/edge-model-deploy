@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "edge-model-deploy"
-version = "0.1.0"
-description = "Lightweight Edge AI Inference & Dynamic Feature Delivery Runtime"
+version = "0.2.0"
+description = "Real Whisper inference with verified weights and reproducible CPU baselines"
 readme = "README.md"
 requires-python = ">=3.8"
 license = { text = "Apache-2.0" }
@@ -14,3 +14,6 @@ dependencies = []
 
 [project.optional-dependencies]
 test = ["pytest"]
+
+[tool.setuptools.packages.find]
+where = ["python"]

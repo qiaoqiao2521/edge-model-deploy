@@ -1,23 +1,60 @@
 /**
  * JNI 标准接口层 (对标移动视频剪辑应用的 JNI 签名规范)
- * 提供与 Android Java / Kotlin 层的零拷贝交互。
+ * Java float[] is copied into a native buffer. Android device acceptance is pending.
  */
 
 #include "edge_model_deploy/whisper_engine.hpp"
 
 #include <jni.h>
+#include <stdexcept>
 #include <string>
 #include <vector>
+
+namespace {
+void ThrowJava(JNIEnv* env, const char* class_name, const char* message) {
+    if (env->ExceptionCheck()) return;
+    jclass exception_class = env->FindClass(class_name);
+    if (exception_class) {
+        env->ThrowNew(exception_class, message);
+        env->DeleteLocalRef(exception_class);
+    }
+}
+
+class UtfChars {
+public:
+    UtfChars(JNIEnv* env, jstring value) : env_(env), value_(value) {
+        chars_ = env_->GetStringUTFChars(value_, nullptr);
+        if (!chars_) throw std::runtime_error("Cannot access Java string");
+    }
+    ~UtfChars() { env_->ReleaseStringUTFChars(value_, chars_); }
+    const char* get() const { return chars_; }
+    UtfChars(const UtfChars&) = delete;
+    UtfChars& operator=(const UtfChars&) = delete;
+private:
+    JNIEnv* env_;
+    jstring value_;
+    const char* chars_;
+};
+} // namespace
 
 extern "C" {
 
 JNIEXPORT jlong JNICALL
 Java_com_edgeai_deploy_WhisperLib_initContext(JNIEnv* env, jobject /*thiz*/, jstring model_path) {
-    if (!model_path) return 0;
-    const char* path_chars = env->GetStringUTFChars(model_path, nullptr);
-    auto engine = edge_ai::WhisperEngine::Create(path_chars);
-    env->ReleaseStringUTFChars(model_path, path_chars);
-    return reinterpret_cast<jlong>(engine.release());
+    if (!model_path) {
+        ThrowJava(env, "java/lang/IllegalArgumentException", "Model path is required");
+        return 0;
+    }
+    try {
+        UtfChars path_chars(env, model_path);
+        auto engine = edge_ai::WhisperEngine::Create(path_chars.get());
+        return reinterpret_cast<jlong>(engine.release());
+    } catch (const std::exception& error) {
+        ThrowJava(env, "java/lang/IllegalStateException", error.what());
+    } catch (...) {
+        ThrowJava(env, "java/lang/IllegalStateException", "Native model initialization failed");
+    }
+    return 0;
 }
 
 JNIEXPORT void JNICALL
@@ -32,27 +69,34 @@ Java_com_edgeai_deploy_WhisperLib_fullTranscribe(
     JNIEnv* env, jobject /*thiz*/, jlong context_ptr, jint num_threads,
     jfloatArray audio_data, jstring language_code, jstring prompt) {
     auto* engine = reinterpret_cast<edge_ai::WhisperEngine*>(context_ptr);
-    if (!engine || !audio_data) return;
-
-    jsize len = env->GetArrayLength(audio_data);
-    std::vector<float> pcm(len);
-    env->GetFloatArrayRegion(audio_data, 0, len, pcm.data());
-
-    std::string lang = "zh";
-    if (language_code) {
-        const char* lang_chars = env->GetStringUTFChars(language_code, nullptr);
-        lang = lang_chars;
-        env->ReleaseStringUTFChars(language_code, lang_chars);
+    if (!engine || !audio_data) {
+        ThrowJava(env, "java/lang/IllegalArgumentException", "Context and audio are required");
+        return;
     }
-
-    std::string prompt_str = "";
-    if (prompt) {
-        const char* prompt_chars = env->GetStringUTFChars(prompt, nullptr);
-        prompt_str = prompt_chars;
-        env->ReleaseStringUTFChars(prompt, prompt_chars);
+    try {
+        const jsize len = env->GetArrayLength(audio_data);
+        if (env->ExceptionCheck()) return;
+        std::vector<float> pcm(static_cast<size_t>(len));
+        env->GetFloatArrayRegion(audio_data, 0, len, pcm.data());
+        if (env->ExceptionCheck()) return;
+        std::string lang = "zh";
+        if (language_code) {
+            UtfChars lang_chars(env, language_code);
+            lang = lang_chars.get();
+        }
+        std::string prompt_str;
+        if (prompt) {
+            UtfChars prompt_chars(env, prompt);
+            prompt_str = prompt_chars.get();
+        }
+        if (!engine->FullTranscribe(pcm, lang, prompt_str, num_threads)) {
+            ThrowJava(env, "java/lang/IllegalStateException", "Transcription failed, cancelled, or input was invalid");
+        }
+    } catch (const std::exception& error) {
+        ThrowJava(env, "java/lang/IllegalStateException", error.what());
+    } catch (...) {
+        ThrowJava(env, "java/lang/IllegalStateException", "Native transcription failed");
     }
-
-    engine->FullTranscribe(pcm, lang, prompt_str, num_threads);
 }
 
 JNIEXPORT jint JNICALL
