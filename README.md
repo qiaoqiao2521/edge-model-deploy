@@ -78,10 +78,15 @@ python3 scripts/benchmark.py --executable build-native/edge-transcribe \
 WER 使用统一的英文文本归一化和总词错误数 / 总参考词数；不使用语气词过滤。
 数据、权重和运行记录不提交 Git。代码、输入、模型和程序哈希保存在本地结果中。
 
+本机已完成一轮 144 次测量，详见 [2026-10-15 基线报告](docs/BASELINE_20261015.md)。
+Ryzen 7 7435H 上，4 线程 Tiny / Base 的平均推理接口耗时为 1085 / 2233 ms，
+小样本 WER 为 8.84% / 6.05%。存在片段时间戳超出音频尾部的异常，报告保留了该限制。
+
 ## 验证与接续
 
 ```bash
 EDGE_NATIVE_EXECUTABLE=build-native/edge-transcribe PYTHONPATH=python python3 -m unittest discover -s tests -v
+cmake -S . -B build-native -DEDGE_TEST_MODEL="$PWD/models/whisper-tiny.bin"
 ctest --test-dir build-native --output-on-failure
 ```
 

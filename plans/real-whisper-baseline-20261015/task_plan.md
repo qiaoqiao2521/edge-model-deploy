@@ -7,8 +7,8 @@
 1. 审阅现状与固定依赖：完成。
 2. 真实 C++ 后端与严格 CLI：完成，real_whisper_native 实现，根 Codex 实测。
 3. Python 权重下载、哈希与原子缓存：完成，verified_model_delivery 实现，根 Codex 真实下载。
-4. 音频数据准备、Python 实际推理入口与基准：工具和 12 段数据完成，测量待执行。
-5. 独立代码审阅、真实运行、文档和提交推送：代码审阅无阻断；基线与最终交付进行中，根 Codex 负责。
+4. 音频数据准备、Python 实际推理入口与基准：完成，144/144 次真实测量通过完整性与哈希复核。
+5. 独立代码审阅、真实运行、文档和提交推送：完成；报告与机器可读汇总经核对，根 Codex 负责最终远端回读。
 
 ## Acceptance
 - 固定官方 whisper.cpp 子模块修订，CPU 构建和边界测试通过。
@@ -30,4 +30,4 @@
 - `git submodule add -b v1.8.2 --depth 1` 将 tag 当 branch，checkout 失败；保留已克隆仓库，改为显式 fetch tag 并 detached checkout。
 
 ## Next Step
-固定当前代码提交后，执行 Tiny/Base × 1/2/4 线程 × 12 段 × 2 次的 144 次独立进程测量。
+本阶段结束。后续使用已明确的现有 ARM 设备复测，先扩大真实样本，不直接宣称调度创新。

@@ -1,0 +1,462 @@
+{
+  "schema_version": 1,
+  "scope": "smoke baseline; small deterministic sample, no statistical generalization or scheduler claim",
+  "status": "complete",
+  "started_at_utc": "2026-10-15T15:42:07.414891+00:00",
+  "finished_at_utc": "2026-10-15T15:50:17.873247+00:00",
+  "source_commit": "3bcee4760c90cb6a4d091d43e305035a028abfb9",
+  "source_dirty_at_start": false,
+  "whisper_cpp_commit": "4979e04f5dcaccb36057e059bbaed8a2f5288315",
+  "cpu_names": [
+    "AMD Ryzen 7 7435H"
+  ],
+  "logical_cpu_count": 16,
+  "build": {
+    "CMAKE_BUILD_TYPE": "Release",
+    "GGML_CPU": "ON",
+    "GGML_CUDA": "OFF",
+    "GGML_METAL": "OFF",
+    "GGML_NATIVE": "OFF",
+    "GGML_OPENMP": "ON",
+    "GGML_VULKAN": "OFF"
+  },
+  "protocol": {
+    "seed": 20261015,
+    "repetitions": 2,
+    "language": "en",
+    "threads": [
+      1,
+      2,
+      4
+    ],
+    "timeout_sec": 300,
+    "normalization": "lowercase; curly apostrophes mapped to ASCII apostrophe; apostrophes deleted within words (don't -> dont); other ASCII punctuation replaced with spaces to preserve word boundaries; split on whitespace; no number expansion",
+    "order": "seeded shuffled clip/repetition blocks, independently shuffled configurations per block",
+    "process": "one independent process per trial; model loading occurs every trial",
+    "cache": "OS/page caches are uncontrolled; no cold/warm cache claim",
+    "e2e": "wall time around subprocess launch, execution, wait, pipe reads; excludes input hashes and JSON parsing",
+    "rss": "peak_rss_kb reported by CLI for its own process lifetime, including load and inference; not system memory or incremental model memory"
+  },
+  "dataset": {
+    "name": "LibriSpeech test-clean deterministic smoke subset",
+    "source": {
+      "url": "https://www.openslr.org/resources/12/test-clean.tar.gz",
+      "resource_url": "https://www.openslr.org/12/",
+      "checksum_url": "https://www.openslr.org/resources/12/md5sum.txt",
+      "archive_md5": "32fa31d27d2e1cad72775fee3f4849a9",
+      "archive_sha256": "39fde525e59672dc6d1551919b1478f724438a95aa55f874b576be21967e6c23",
+      "license": "CC BY 4.0",
+      "license_url": "https://creativecommons.org/licenses/by/4.0/",
+      "attribution": "LibriSpeech: Vassil Panayotov, Guoguo Chen, Daniel Povey, Sanjeev Khudanpur (2015); audio derived from LibriVox",
+      "changes": "Deterministic subset; FLAC decoded to PCM16 mono 16000 Hz WAV"
+    },
+    "selection": {
+      "speakers": 4,
+      "utterances_per_speaker": 3,
+      "order": "numeric speaker; numeric (speaker, chapter, utterance)"
+    },
+    "unique_clips": 12,
+    "unique_duration_sec": 84.55,
+    "unique_reference_word_count": 215,
+    "manifest_sha256": "cf3961c31bc5937d222cf1376ea577c6d3c695d9a28536c174fcb925b02eccac",
+    "clips": [
+      {
+        "id": "61-70968-0000",
+        "speaker": "61",
+        "audio_sha256": "93bd2f7550611af6d12013ebc3cd4beead9af1112f0a3766476448bc0b8435b2",
+        "source_flac_sha256": "fd3c84146d8b357efc7f0d21de86de770721fc5ddac7e6577688dbf3cdabff5b",
+        "duration_sec": 4.905
+      },
+      {
+        "id": "61-70968-0001",
+        "speaker": "61",
+        "audio_sha256": "47d1d3b852ffd0f2aed4388289e82c6e6398ce64c00d1f28c4738b62c0947ac5",
+        "source_flac_sha256": "2f7236fa44f194f03b04571f94fd56cc99253f5d41496bff3476c3390dd20524",
+        "duration_sec": 3.61
+      },
+      {
+        "id": "61-70968-0002",
+        "speaker": "61",
+        "audio_sha256": "0395434a101a73e590d290a86b0ce76f3489aede93d84c5940e07c2bb10bffa1",
+        "source_flac_sha256": "8676316e531d8c0e496e3677811ed2bf63e5aaf0a12446cde70416fd490b1792",
+        "duration_sec": 2.97
+      },
+      {
+        "id": "121-121726-0000",
+        "speaker": "121",
+        "audio_sha256": "0dfade9891af74e99fce7b57907cc678e16ba34e547ee1d3879c6865ebcda319",
+        "source_flac_sha256": "81378fdb3e648b43efb1cb8c4f87da3fc9cfbe19c5dda97e9e7361c4a2470d2f",
+        "duration_sec": 8.46
+      },
+      {
+        "id": "121-121726-0001",
+        "speaker": "121",
+        "audio_sha256": "d66224dda8f3bf0a9b5507133750d872579262b1384c6dc9ff439f91b5c3e57a",
+        "source_flac_sha256": "4d4459266056fcd052ced71563e093ecf74a420abfa3a402283fb6b8eb848441",
+        "duration_sec": 5.925
+      },
+      {
+        "id": "121-121726-0002",
+        "speaker": "121",
+        "audio_sha256": "baf7c5535f6611b976d06751dc0d1ffc8930b211370a3e48817786b2e611182d",
+        "source_flac_sha256": "5d461a2020d7c302d607d3b5a6a8f81a01d29e2b29041faccc7925ee098d6dc7",
+        "duration_sec": 4.41
+      },
+      {
+        "id": "237-126133-0000",
+        "speaker": "237",
+        "audio_sha256": "e043fa0b44557f1f87ed9a64fa81dd252a68ea1a86d1a0f7a9cb244d03667d59",
+        "source_flac_sha256": "25466538df82602d1e597b0cb016e4dd0ce11031cb8994a4289d1c07170878ee",
+        "duration_sec": 13.29
+      },
+      {
+        "id": "237-126133-0001",
+        "speaker": "237",
+        "audio_sha256": "0f9673dce4fbdcac5ddd62738e71a80214ee0740d13cc03fdf22112754c0600e",
+        "source_flac_sha256": "dfde7ea9d4eb3121b32043dffe260b257aaaad3ba163a815491d5b6dad01e5d0",
+        "duration_sec": 11.965
+      },
+      {
+        "id": "237-126133-0002",
+        "speaker": "237",
+        "audio_sha256": "93c3db4e5aa0571af51aceda00295b9a1fa8b2b5f4592d0545a7d05ee1358f41",
+        "source_flac_sha256": "3b5dc6a941b833c976fb1d5fec3f443820b199b5d718943b22de023ab1a9a53d",
+        "duration_sec": 8.92
+      },
+      {
+        "id": "260-123286-0000",
+        "speaker": "260",
+        "audio_sha256": "88dc3804b24d6a4f2eb9704bdac3c051dde60b423ffc137897f00bc03718d53f",
+        "source_flac_sha256": "d654a43d06f0e8b586b525e8ec83d6e3c0dc83c3f4742f8e25fd291db77248b3",
+        "duration_sec": 7.04
+      },
+      {
+        "id": "260-123286-0001",
+        "speaker": "260",
+        "audio_sha256": "3a98aaa8d78e34c4cab39e112d75efd309406643c405f1afdc9908c6e128c752",
+        "source_flac_sha256": "482a025752a99bedf0d539c055c80c1f0396f3f0b0094fd1d3ff89b3d26beb9e",
+        "duration_sec": 3.07
+      },
+      {
+        "id": "260-123286-0002",
+        "speaker": "260",
+        "audio_sha256": "c77cac1476ebf1f6c8ae33f210c024e90aaeefe0c5947ce70d1203a3386bc057",
+        "source_flac_sha256": "25d5b388fb4d8f14752fbbfb9f1b020b4de121b9be7d20ee6632b060ab88bd82",
+        "duration_sec": 9.985
+      }
+    ]
+  },
+  "models": [
+    {
+      "label": "tiny",
+      "sha256": "be07e048e1e599ad46341c8d2a135645097a538221678b7acdd1b1919c6e1b21"
+    },
+    {
+      "label": "base",
+      "sha256": "60ed5bc3dd14eea856493d334349b405782ddcaf0028d4b5df4088345fba2efe"
+    }
+  ],
+  "executable_sha256": "cf3144d5898cd8b06c2abf794bf581155ecdb95ce38e10a615b9fdc215698d97",
+  "linked_libraries": [
+    {
+      "name": "libedge_model_deploy.so",
+      "sha256": "1c3c6243f4fe8d639f70ab238c74a480b94d33e1385333a8e9493f0d0e5efbbb"
+    },
+    {
+      "name": "ld-linux-x86-64.so.2",
+      "sha256": "c20a2dc8917c755f02b94049356320fe1f62ac7d9f8994731f807d9df39302da"
+    },
+    {
+      "name": "libc.so.6",
+      "sha256": "3a15d66867d83762c7f2f1e37359cb8f6c5743edb369c65285cb0b1c4f7498bf"
+    },
+    {
+      "name": "libgcc_s.so.1",
+      "sha256": "d93224d2b0dab4247598be683adca02f5cf00586f99c187579cd7e92058fb7cb"
+    },
+    {
+      "name": "libgomp.so.1.0.0",
+      "sha256": "135f3c8f006d2fe5e68e51281c7974cb991a03de3bfb3593d68d174dfcf854d1"
+    },
+    {
+      "name": "libm.so.6",
+      "sha256": "fce00b6f25f459cf4ae0b7fae4257909a1a8a86f9149e7c029a5d617baf1ccd0"
+    },
+    {
+      "name": "libstdc++.so.6.0.33",
+      "sha256": "1fd75fe70354a416d75aef22bcae68c47bd25d20e2d0568c30b1a9838cf62f11"
+    }
+  ],
+  "raw_local_result_sha256": "2630790c390e0350da0c061184078ec6a554f7ba9de20c96d4680a915e89e47e",
+  "raw_records_distribution": "Local only; weights, audio, and runtime logs are not committed.",
+  "expected_trials": 144,
+  "completed_trials": 144,
+  "failed_trials": 0,
+  "changed_inputs": [],
+  "timestamp_anomalies": {
+    "trials": 24,
+    "segments": 24,
+    "maximum_end_beyond_audio_ms": 1075.0,
+    "handling": "Preserved raw timestamps. No clipping or word-alignment claim."
+  },
+  "summary": [
+    {
+      "model": "base",
+      "threads": 1,
+      "attempted_trials": 24,
+      "successful_trials": 24,
+      "failed_trials": 0,
+      "complete": true,
+      "metrics_scope": "successful trials only; incomplete configurations are not comparable",
+      "load_ms": {
+        "mean": 183.19241666666667,
+        "median": 180.0905
+      },
+      "inference_ms": {
+        "mean": 7011.859291666667,
+        "median": 6906.2195
+      },
+      "e2e_ms": {
+        "mean": 7244.0655352915355,
+        "median": 7146.369469999627
+      },
+      "inference_rtf": {
+        "mean": 1.2530530173400969,
+        "median": 1.0992401001510355
+      },
+      "e2e_rtf": {
+        "mean": 1.295096091590932,
+        "median": 1.1392947489693275
+      },
+      "peak_rss_kb_max": 242896,
+      "accuracy": {
+        "substitutions": 22,
+        "deletions": 4,
+        "insertions": 0,
+        "errors": 26,
+        "reference_words": 430,
+        "wer": 0.06046511627906977,
+        "scope": "micro WER over successful repeated trials; each repetition counts its reference words"
+      },
+      "audio_duration_ms_total": 169100.0,
+      "inference_rtf_duration_weighted": 0.9951781371969248,
+      "e2e_rtf_duration_weighted": 1.0281346708870303
+    },
+    {
+      "model": "base",
+      "threads": 2,
+      "attempted_trials": 24,
+      "successful_trials": 24,
+      "failed_trials": 0,
+      "complete": true,
+      "metrics_scope": "successful trials only; incomplete configurations are not comparable",
+      "load_ms": {
+        "mean": 185.6505,
+        "median": 180.2415
+      },
+      "inference_ms": {
+        "mean": 3831.71525,
+        "median": 3692.4764999999998
+      },
+      "e2e_ms": {
+        "mean": 4063.8309636666086,
+        "median": 3921.630782999273
+      },
+      "inference_rtf": {
+        "mean": 0.6769676504220185,
+        "median": 0.6151143344241465
+      },
+      "e2e_rtf": {
+        "mean": 0.7184344830961759,
+        "median": 0.6539339609281738
+      },
+      "peak_rss_kb_max": 242612,
+      "accuracy": {
+        "substitutions": 22,
+        "deletions": 4,
+        "insertions": 0,
+        "errors": 26,
+        "reference_words": 430,
+        "wer": 0.06046511627906977,
+        "scope": "micro WER over successful repeated trials; each repetition counts its reference words"
+      },
+      "audio_duration_ms_total": 169100.0,
+      "inference_rtf_duration_weighted": 0.5438271200473093,
+      "e2e_rtf_duration_weighted": 0.5767708050147758
+    },
+    {
+      "model": "base",
+      "threads": 4,
+      "attempted_trials": 24,
+      "successful_trials": 24,
+      "failed_trials": 0,
+      "complete": true,
+      "metrics_scope": "successful trials only; incomplete configurations are not comparable",
+      "load_ms": {
+        "mean": 184.17854166666666,
+        "median": 184.2295
+      },
+      "inference_ms": {
+        "mean": 2233.2590416666667,
+        "median": 2198.5315
+      },
+      "e2e_ms": {
+        "mean": 2466.971013833245,
+        "median": 2433.229976999428
+      },
+      "inference_rtf": {
+        "mean": 0.3980186129415524,
+        "median": 0.35157670886075953
+      },
+      "e2e_rtf": {
+        "mean": 0.4406397516034613,
+        "median": 0.3892725267509116
+      },
+      "peak_rss_kb_max": 242480,
+      "accuracy": {
+        "substitutions": 22,
+        "deletions": 4,
+        "insertions": 0,
+        "errors": 26,
+        "reference_words": 430,
+        "wer": 0.06046511627906977,
+        "scope": "micro WER over successful repeated trials; each repetition counts its reference words"
+      },
+      "audio_duration_ms_total": 169100.0,
+      "inference_rtf_duration_weighted": 0.3169616617386162,
+      "e2e_rtf_duration_weighted": 0.35013190024836116
+    },
+    {
+      "model": "tiny",
+      "threads": 1,
+      "attempted_trials": 24,
+      "successful_trials": 24,
+      "failed_trials": 0,
+      "complete": true,
+      "metrics_scope": "successful trials only; incomplete configurations are not comparable",
+      "load_ms": {
+        "mean": 125.08129166666667,
+        "median": 120.35900000000001
+      },
+      "inference_ms": {
+        "mean": 3261.1384583333333,
+        "median": 3143.9845
+      },
+      "e2e_ms": {
+        "mean": 3414.8739726250974,
+        "median": 3301.6468800005896
+      },
+      "inference_rtf": {
+        "mean": 0.5780348710641767,
+        "median": 0.5102921164772727
+      },
+      "e2e_rtf": {
+        "mean": 0.6055935205818584,
+        "median": 0.5398537148437299
+      },
+      "peak_rss_kb_max": 150172,
+      "accuracy": {
+        "substitutions": 26,
+        "deletions": 0,
+        "insertions": 12,
+        "errors": 38,
+        "reference_words": 430,
+        "wer": 0.08837209302325581,
+        "scope": "micro WER over successful repeated trials; each repetition counts its reference words"
+      },
+      "audio_duration_ms_total": 169100.0,
+      "inference_rtf_duration_weighted": 0.46284638083973983,
+      "e2e_rtf_duration_weighted": 0.48466573236547805
+    },
+    {
+      "model": "tiny",
+      "threads": 2,
+      "attempted_trials": 24,
+      "successful_trials": 24,
+      "failed_trials": 0,
+      "complete": true,
+      "metrics_scope": "successful trials only; incomplete configurations are not comparable",
+      "load_ms": {
+        "mean": 123.40716666666667,
+        "median": 120.9485
+      },
+      "inference_ms": {
+        "mean": 1814.3252083333334,
+        "median": 1759.2894999999999
+      },
+      "e2e_ms": {
+        "mean": 1967.7445655417312,
+        "median": 1909.4055330006086
+      },
+      "inference_rtf": {
+        "mean": 0.32067223336793427,
+        "median": 0.2880135864978903
+      },
+      "e2e_rtf": {
+        "mean": 0.348424887662887,
+        "median": 0.3136646158647928
+      },
+      "peak_rss_kb_max": 150340,
+      "accuracy": {
+        "substitutions": 26,
+        "deletions": 0,
+        "insertions": 12,
+        "errors": 38,
+        "reference_words": 430,
+        "wer": 0.08837209302325581,
+        "scope": "micro WER over successful repeated trials; each repetition counts its reference words"
+      },
+      "audio_duration_ms_total": 169100.0,
+      "inference_rtf_duration_weighted": 0.2575032820816085,
+      "e2e_rtf_duration_weighted": 0.27927776211118593
+    },
+    {
+      "model": "tiny",
+      "threads": 4,
+      "attempted_trials": 24,
+      "successful_trials": 24,
+      "failed_trials": 0,
+      "complete": true,
+      "metrics_scope": "successful trials only; incomplete configurations are not comparable",
+      "load_ms": {
+        "mean": 122.98745833333334,
+        "median": 119.107
+      },
+      "inference_ms": {
+        "mean": 1085.0358333333334,
+        "median": 1020.4845
+      },
+      "e2e_ms": {
+        "mean": 1237.5662139167314,
+        "median": 1162.8266694997365
+      },
+      "inference_rtf": {
+        "mean": 0.18991833568379266,
+        "median": 0.17424401841262005
+      },
+      "e2e_rtf": {
+        "mean": 0.21741755656689357,
+        "median": 0.1983566257104177
+      },
+      "peak_rss_kb_max": 150312,
+      "accuracy": {
+        "substitutions": 26,
+        "deletions": 0,
+        "insertions": 12,
+        "errors": 38,
+        "reference_words": 430,
+        "wer": 0.08837209302325581,
+        "scope": "micro WER over successful repeated trials; each repetition counts its reference words"
+      },
+      "audio_duration_ms_total": 169100.0,
+      "inference_rtf_duration_weighted": 0.15399680662329981,
+      "e2e_rtf_duration_weighted": 0.17564511610882053
+    }
+  ],
+  "limits": [
+    "Small deterministic English sample; no population or significance claim.",
+    "Repeated recognition of the same clips is not additional independent speech data.",
+    "Desktop background load, clocks, and thermals were uncontrolled.",
+    "No ARM, Android, power, thermal, or adaptive-scheduler validation."
+  ]
+}

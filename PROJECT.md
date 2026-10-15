@@ -21,14 +21,15 @@
 本机测试是 x86 CPU 验证，不能替代 ARM、Android、温升或功耗实验。
 
 ## Current State
-真实 C++ / Python 推理已通过 JFK 音频联调。权重与公开语音集已校验。
-固定小样本的多配置测量正在准备；尚无论文贡献结论。
+真实 C++ / Python 推理已通过 JFK 音频联调，固定 LibriSpeech 小样本 144 次测量全部完成。
+当前本机基线支持速度、词错误率与内存的配置取舍；尚无论文贡献结论。
 
 ## Current Priority
-接通 whisper.cpp，移除伪权重和伪转写，建立小规模真实基线。
+以现有 ARM 设备扩大真实基线，先找到固定配置的可重复问题，再决定调度策略。
 
 ## Knowledge Map
 - [README](README.md)：构建、运行与能力边界。
+- [本机基线](docs/BASELINE_20261015.md)：真实结果与实验限制。
 - [当前计划](plans/real-whisper-baseline-20261015/task_plan.md)：验收和分工。
 - [发现](plans/real-whisper-baseline-20261015/findings.md)：来源与实验限制。
 - [进度](plans/real-whisper-baseline-20261015/progress.md)：恢复入口。
